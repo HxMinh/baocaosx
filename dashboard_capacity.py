@@ -11,6 +11,7 @@ from datetime import datetime
 import gspread
 from google.oauth2.service_account import Credentials
 import numpy as np
+import os
 
 # ============= CẤU HÌNH =============
 st.set_page_config(
@@ -45,11 +46,16 @@ def authenticate_google_sheets():
             pass
             
         # Nếu không có secret, đọc từ file JSON (môi trường Local)
-        creds = Credentials.from_service_account_file(
-            CONFIG['google_credentials'],
-            scopes=scopes
-        )
-        return gspread.authorize(creds)
+        if os.path.exists(CONFIG['google_credentials']):
+            creds = Credentials.from_service_account_file(
+                CONFIG['google_credentials'],
+                scopes=scopes
+            )
+            return gspread.authorize(creds)
+        else:
+            st.error("❌ Lỗi: Không tìm thấy 'gcp_service_account' trong Secrets và không có file JSON cục bộ.")
+            st.info("💡 Vui lòng vào Settings -> Secrets trên Streamlit Cloud và dán cấu hình TOML vào.")
+            return None
     except Exception as e:
         st.error(f"❌ Lỗi xác thực: {e}")
         return None
