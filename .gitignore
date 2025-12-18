@@ -1,0 +1,21 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Streamlit
+.streamlit/
+!/.streamlit/config.toml
+
+# Environment & Credentials
+.env
+.venv
+venv/
+*.json
+!package.json
+
+# Excel files
+*.xlsx
+*.xls
+*.xlsm
