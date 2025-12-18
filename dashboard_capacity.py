@@ -37,17 +37,17 @@ def authenticate_google_sheets():
         # Thử đọc từ Streamlit Secrets (cho môi trường Cloud)
         try:
             if "gcp_service_account" in st.secrets:
-            creds = Credentials.from_service_account_info(
-                st.secrets["gcp_service_account"],
-                scopes=scopes
-            )
-            return gspread.authorize(creds)
-        else:
-            # Debug: List available keys to help user check config
-            st.error("❌ Lỗi: Không tìm thấy 'gcp_service_account' trong Secrets.")
-            st.write(f"🔍 Các keys hiện có trong Secrets: {list(st.secrets.keys())}")
-            st.info("💡 Vui lòng kiểm tra lại tên header trong Secrets phải là [gcp_service_account]")
-            return None
+                creds = Credentials.from_service_account_info(
+                    st.secrets["gcp_service_account"],
+                    scopes=scopes
+                )
+                return gspread.authorize(creds)
+            else:
+                # Debug: List available keys to help user check config
+                st.error("❌ Lỗi: Không tìm thấy 'gcp_service_account' trong Secrets.")
+                st.write(f"🔍 Các keys hiện có trong Secrets: {list(st.secrets.keys())}")
+                st.info("💡 Vui lòng kiểm tra lại tên header trong Secrets phải là [gcp_service_account]")
+                return None
             
         # Nếu không có secret, đọc từ file JSON (môi trường Local)
         if os.path.exists(CONFIG['google_credentials']):
