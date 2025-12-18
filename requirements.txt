@@ -3,10 +3,7 @@ openpyxl
 msoffcrypto-tool
 streamlit
 gspread
-oauth2client
 plotly
-pywin32
-gspread
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
