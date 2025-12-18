@@ -39,14 +39,16 @@ def authenticate_google_sheets():
             # Fix escaped newlines in private_key if present
             creds_dict = dict(st.secrets["gcp_service_account"])
             if "private_key" in creds_dict:
-                original_key = creds_dict["private_key"]
                 # Replace literal \n with actual newlines
-                creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
+                key = creds_dict["private_key"].replace("\\n", "\n")
                 
-                # Debug: Show first/last 50 chars
-                st.write(f"🔍 Debug - Key starts with: {creds_dict['private_key'][:50]}")
-                st.write(f"🔍 Debug - Key ends with: {creds_dict['private_key'][-50:]}")
-                st.write(f"🔍 Debug - Contains actual newlines: {chr(10) in creds_dict['private_key']}")
+                # Ensure proper PEM format: newline after BEGIN header
+                key = key.replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n")
+                key = key.replace("-----END PRIVATE KEY-----", "\n-----END PRIVATE KEY-----")
+                # Remove duplicate newlines
+                key = key.replace("\n\n", "\n")
+                
+                creds_dict["private_key"] = key
             
             creds = Credentials.from_service_account_info(
                 creds_dict,
