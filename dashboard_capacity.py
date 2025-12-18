@@ -436,7 +436,7 @@ def create_machine_time_count_chart(data_dict, count_dict):
 
 
 def main():
-    st.title("📊 BIỂU ĐỒ TỔNG CÔNG SUẤT MÁY LẺ")
+    st.title("📊 BIỂU ĐỒ TỔNG CÔNG SUẤT MÁY")
     
     # Sidebar
     with st.sidebar:
