@@ -34,26 +34,27 @@ def authenticate_google_sheets():
     try:
         scopes = ['https://www.googleapis.com/auth/spreadsheets']
         
-        # Thử đọc từ Streamlit Secrets (cho môi trường Cloud)
+        # Method 1: Try base64-encoded credentials (most reliable for Cloud)
+        if "gcp_service_account_base64" in st.secrets:
+            import base64
+            import json
+            decoded = base64.b64decode(st.secrets["gcp_service_account_base64"]).decode()
+            creds_dict = json.loads(decoded)
+            creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+            return gspread.authorize(creds)
+        
+        # Method 2: Try regular TOML format
         if "gcp_service_account" in st.secrets:
-            # Fix escaped newlines in private_key if present
             creds_dict = dict(st.secrets["gcp_service_account"])
             if "private_key" in creds_dict:
-                # Replace literal \n with actual newlines
+                # Fix escaped newlines
                 key = creds_dict["private_key"].replace("\\n", "\n")
-                
-                # Ensure proper PEM format: newline after BEGIN header
                 key = key.replace("-----BEGIN PRIVATE KEY-----", "-----BEGIN PRIVATE KEY-----\n")
                 key = key.replace("-----END PRIVATE KEY-----", "\n-----END PRIVATE KEY-----")
-                # Remove duplicate newlines
                 key = key.replace("\n\n", "\n")
-                
                 creds_dict["private_key"] = key
             
-            creds = Credentials.from_service_account_info(
-                creds_dict,
-                scopes=scopes
-            )
+            creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
             return gspread.authorize(creds)
             
         # Nếu không có secret, đọc từ file JSON (môi trường Local)
