@@ -36,8 +36,14 @@ def authenticate_google_sheets():
         
         # Thử đọc từ Streamlit Secrets (cho môi trường Cloud)
         if "gcp_service_account" in st.secrets:
+            # Fix escaped newlines in private_key if present
+            creds_dict = dict(st.secrets["gcp_service_account"])
+            if "private_key" in creds_dict:
+                # Replace literal \n with actual newlines
+                creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
+            
             creds = Credentials.from_service_account_info(
-                st.secrets["gcp_service_account"],
+                creds_dict,
                 scopes=scopes
             )
             return gspread.authorize(creds)
