@@ -815,19 +815,6 @@ def main():
             if not df_machine_stats.empty:
                 df_tgcb = df_machine_stats[df_machine_stats['pct_tgcb'] > 10].copy()
                 if not df_tgcb.empty:
-                    df_tgcb_display = df_tgcb[['số máy']].copy()
-                    df_tgcb_display.columns = ['Số máy']
-                    st.dataframe(df_tgcb_display, use_container_width=True, hide_index=True)
-                else:
-                    st.success("✅ Không có máy nào có tỷ lệ chuẩn bị > 10%")
-            else:
-                st.warning("Không có dữ liệu")
-
-        # TAB 3: Máy chuẩn bị > 10%
-        with tab3:
-            if not df_machine_stats.empty:
-                df_tgcb = df_machine_stats[df_machine_stats['pct_tgcb'] > 10].copy()
-                if not df_tgcb.empty:
                     df_tgcb = df_tgcb.sort_values('machine_num')  # Sort by numeric value
                     df_tgcb_display = df_tgcb[['số máy']].copy()
                     df_tgcb_display.columns = ['Số máy']
@@ -839,13 +826,38 @@ def main():
         
         # TAB 4: Máy dừng 100%
         with tab4:
+            # Determine which machine type we're analyzing based on the data
+            # Check if we have lathe or milling machines in this department
+            lathe_machines_config = CONFIG['lathe_machines']
+            machines_in_dept = df_dept['số máy'].unique().tolist()
+            
+            # Determine machine type for this analysis
+            has_lathe = any(m in lathe_machines_config for m in machines_in_dept)
+            has_milling = any(m not in lathe_machines_config for m in machines_in_dept)
+            
             # Get full machine list from Google Sheets
-            all_machines = read_machine_list()
+            all_machines_full = read_machine_list()
+            
+            # Filter machine list by type based on what's in this department
+            # If department has both types, we need to show separately
+            # For now, we'll filter based on the predominant type
+            if has_lathe and not has_milling:
+                # Only lathe machines in this dept
+                all_machines = [m for m in all_machines_full if m in lathe_machines_config]
+                machine_type_label = "máy tiện"
+            elif has_milling and not has_lathe:
+                # Only milling machines in this dept
+                all_machines = [m for m in all_machines_full if m not in lathe_machines_config]
+                machine_type_label = "máy phay"
+            else:
+                # Mixed - use all machines (shouldn't happen in normal case)
+                all_machines = all_machines_full
+                machine_type_label = "máy"
             
             # Get machines in current department data
             machines_in_data = df_dept['số máy'].unique().tolist()
             
-            # CONDITION 1: Machines NOT in data
+            # CONDITION 1: Machines NOT in data (filtered by type)
             machines_not_in_data = [m for m in all_machines if m not in machines_in_data]
             
             # CONDITION 2 AND 3: Machines with stop time >= shift times AND all production columns empty
@@ -853,6 +865,10 @@ def main():
             SHIFT_TIMES = [420, 630, 660]
             
             for machine in machines_in_data:
+                # Only process machines of the correct type
+                if machine not in all_machines:
+                    continue
+                    
                 df_machine = df_dept[df_dept['số máy'] == machine].copy()
                 
                 # Check if machine has stop time >= any shift time
