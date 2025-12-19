@@ -674,9 +674,9 @@ def main():
             st.warning("Không đủ dữ liệu để hiển thị")
     
     
-    # ========== CHI TIẾT TỪNG PHÂN XƯỞNG ==========
+    # ========== CHI TIẾT CÁC CA ==========
     st.markdown("---")
-    st.header("📋 CHI TIẾT TỪNG PHÂN XƯỞNG")
+    st.header("📋 CHI TIẾT CÁC CA")
     
     for dept in departments:
         st.markdown("---")
@@ -929,3 +929,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
